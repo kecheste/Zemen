@@ -1,3 +1,3 @@
 # Flutter e-commerce application
 
-### An ecommerce web app built with flutter and firebase
+### An ecommerce mobile app built with flutter and firebase
