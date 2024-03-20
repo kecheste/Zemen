@@ -2,10 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:shop_app/constants.dart';
+import 'package:shop_app/models/user_model.dart';
 import 'package:shop_app/screens/chat/chat_room/chat_room.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  const ChatPage({super.key, required MyUser user});
 
   static String routeName = "/chatpage";
 

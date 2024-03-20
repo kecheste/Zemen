@@ -1,14 +1,17 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shop_app/models/Product.dart';
+import 'package:shop_app/models/user_model.dart';
 import 'package:shop_app/service/utils.dart';
 
 class AddItem extends StatefulWidget {
-  const AddItem({super.key});
+  const AddItem({super.key, required this.user});
+
+  final MyUser user;
 
   static String routeName = "/additem";
 
@@ -24,9 +27,9 @@ class _AddItemState extends State<AddItem> {
   int currentPage = 0;
 
   final _formKey = GlobalKey<FormState>();
-  String? title;
-  String? description;
-  Int? price;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
 
   void selectImage() async {
     Uint8List? img = await pickImage(ImageSource.gallery);
@@ -61,7 +64,7 @@ class _AddItemState extends State<AddItem> {
               height: 30,
             ),
             TextFormField(
-              onSaved: (newValue) => title = newValue,
+              controller: _titleController,
               decoration: const InputDecoration(
                 labelText: "Title",
                 hintText: "Enter the title",
@@ -74,7 +77,7 @@ class _AddItemState extends State<AddItem> {
               height: 20,
             ),
             TextFormField(
-              onSaved: (newValue) => title = newValue,
+              controller: _descriptionController,
               decoration: const InputDecoration(
                 labelText: "Description",
                 hintText: "Enter description",
@@ -87,8 +90,8 @@ class _AddItemState extends State<AddItem> {
               height: 20,
             ),
             TextFormField(
+              controller: _priceController,
               keyboardType: TextInputType.number,
-              onSaved: (newValue) => title = newValue,
               decoration: const InputDecoration(
                 labelText: "Price",
                 hintText: "Enter the price",
@@ -190,7 +193,14 @@ class _AddItemState extends State<AddItem> {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  //
+                  Product newItem = Product.empty;
+                  newItem = newItem.copyWith(
+                      title: _titleController.text,
+                      description: _descriptionController.text,
+                      price: _priceController.text,
+                      author: widget.user.id);
+
+                  print(newItem);
                 }
               },
               child: const Text("Post Ad"),

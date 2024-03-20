@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/models/user_model.dart';
+import 'package:shop_app/repository/auth.dart';
 import 'package:shop_app/screens/profile/settings/edit_profile.dart';
 import 'package:shop_app/screens/profile/settings/my_account.dart';
 import 'package:shop_app/screens/sign_in/sign_in_screen.dart';
@@ -9,7 +11,7 @@ import 'components/profile_pic.dart';
 class ProfileScreen extends StatelessWidget {
   static String routeName = "/profile";
 
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, required MyUser user});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,8 +51,12 @@ class ProfileScreen extends StatelessWidget {
             ProfileMenu(
               text: "Log Out",
               icon: "assets/icons/Log out.svg",
-              press: () {
-                Navigator.pushNamed(context, SignInScreen.routeName);
+              press: () async {
+                await AuthRepository().logOut().then((value) {
+                  if (value == "Logged Out!") {
+                    Navigator.pushNamed(context, SignInScreen.routeName);
+                  }
+                });
               },
             ),
           ],

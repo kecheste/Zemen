@@ -1,19 +1,23 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 
-import '../../components/no_account_text.dart';
 import 'components/sign_form.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends StatefulWidget {
   static String routeName = "/sign_in";
 
   const SignInScreen({super.key});
+
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Sign In"),
-      ),
-      body: const SafeArea(
+      body: SafeArea(
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -21,7 +25,15 @@ class SignInScreen extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: 16),
+                  SizedBox(height: 50),
+                  Image.asset(
+                    "assets/images/zemen.png",
+                    height: 100,
+                    width: 100,
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
                   Text(
                     "Welcome Back",
                     style: TextStyle(
@@ -37,25 +49,8 @@ class SignInScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   SignForm(),
                   SizedBox(height: 16),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: [
-                  //     SocalCard(
-                  //       icon: "assets/icons/google-icon.svg",
-                  //       press: () {},
-                  //     ),
-                  //     SocalCard(
-                  //       icon: "assets/icons/facebook-2.svg",
-                  //       press: () {},
-                  //     ),
-                  //     SocalCard(
-                  //       icon: "assets/icons/twitter.svg",
-                  //       press: () {},
-                  //     ),
-                  //   ],
-                  // ),
                   SizedBox(height: 20),
-                  NoAccountText(),
+                  // NoAccountText(),
                 ],
               ),
             ),

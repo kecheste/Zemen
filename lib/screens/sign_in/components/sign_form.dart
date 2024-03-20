@@ -1,13 +1,14 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shop_app/blocs/authentication/authentication_bloc.dart';
 import 'package:shop_app/screens/otp/otp_screen.dart';
 
 import '../../../components/custom_surfix_icon.dart';
 import '../../../components/form_error.dart';
 import '../../../constants.dart';
 import '../../../helper/keyboard.dart';
-import '../../forgot_password/forgot_password_screen.dart';
 
 class SignForm extends StatefulWidget {
   const SignForm({super.key});
@@ -17,11 +18,15 @@ class SignForm extends StatefulWidget {
 }
 
 class _SignFormState extends State<SignForm> {
+  final TextEditingController _phoneController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   Int? phone;
   String? password;
   bool? remember = false;
   final List<String?> errors = [];
+
+  Widget buttonChild = const Text("Continue");
 
   void addError({String? error}) {
     if (!errors.contains(error)) {
@@ -41,108 +46,81 @@ class _SignFormState extends State<SignForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          TextFormField(
-            keyboardType: TextInputType.phone,
-            // onSaved: (newValue) => phone = newValue as Int?,
-            onChanged: (value) {
-              if (value.isNotEmpty) {
-                removeError(error: kPhoneNumberNullError);
-              }
-              return;
-            },
-            validator: (value) {
-              if (value!.isEmpty) {
-                addError(error: kPhoneNumberNullError);
-                return "";
-              }
-              //  else if (!emailValidatorRegExp.hasMatch(value)) {
-              //   addError(error: kInvalidEmailError);
-              //   return "";
-              // }
-              return null;
-            },
-            decoration: const InputDecoration(
-              labelText: "Phone",
-              hintText: "Enter your phone",
-              // If  you are using latest version of flutter then lable text and hint text shown like this
-              // if you r using flutter less then 1.20.* then maybe this is not working properly
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Phone.svg"),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            obscureText: true,
-            onSaved: (newValue) => password = newValue,
-            onChanged: (value) {
-              if (value.isNotEmpty) {
-                removeError(error: kPassNullError);
-              } else if (value.length >= 8) {
-                removeError(error: kShortPassError);
-              }
-              return;
-            },
-            validator: (value) {
-              if (value!.isEmpty) {
-                addError(error: kPassNullError);
-                return "";
-              } else if (value.length < 8) {
-                addError(error: kShortPassError);
-                return "";
-              }
-              return null;
-            },
-            decoration: const InputDecoration(
-              labelText: "Password",
-              hintText: "Enter your password",
-              // If  you are using latest version of flutter then lable text and hint text shown like this
-              // if you r using flutter less then 1.20.* then maybe this is not working properly
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              suffixIcon: CustomSurffixIcon(svgIcon: "assets/icons/Lock.svg"),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Checkbox(
-                value: remember,
-                activeColor: kPrimaryColor,
-                onChanged: (value) {
-                  setState(() {
-                    remember = value;
-                  });
-                },
-              ),
-              const Text("Remember me"),
-              const Spacer(),
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(
-                    context, ForgotPasswordScreen.routeName),
-                child: const Text(
-                  "Forgot Password",
-                  style: TextStyle(decoration: TextDecoration.underline),
+    return BlocListener<AuthenticationBloc, AuthenticationState>(
+      listener: (context, state) {
+        print("OTP SCREEN: $state");
+        if (state is AuthenticationOtpState) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OtpScreen(
+                  phone: _phoneController.text,
                 ),
-              )
-            ],
-          ),
-          FormError(errors: errors),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                // if all are valid then go to success screen
-                KeyboardUtil.hideKeyboard(context);
-                Navigator.pushNamed(context, OtpScreen.routeName);
-              }
-            },
-            child: const Text("Continue"),
-          ),
-        ],
+              ));
+        }
+        if (state is AuthenticationLoadingState) {
+          setState(() {
+            buttonChild = const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 3,
+            );
+          });
+        }
+      },
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              onChanged: (value) {
+                if (value.isNotEmpty) {
+                  removeError(error: kPhoneNumberNullError);
+                }
+                return;
+              },
+              validator: (value) {
+                if (value!.isEmpty) {
+                  addError(error: kPhoneNumberNullError);
+                  return "";
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                labelText: "Phone",
+                hintText: "912345678",
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                suffixIcon:
+                    CustomSurffixIcon(svgIcon: "assets/icons/Phone.svg"),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const SizedBox(height: 20),
+            FormError(errors: errors),
+            const SizedBox(height: 20),
+            ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    KeyboardUtil.hideKeyboard(context);
+                    BlocProvider.of<AuthenticationBloc>(context)
+                        .add(SendOtp(_phoneController.text, () {
+                      Navigator.pop(context);
+                    }, () {
+                      print("OTP SENT");
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => OtpScreen(
+                                phone: _phoneController.text,
+                              )));
+                      print("DONE NAVIGATING");
+                    }));
+                    print("SENDING OTP");
+                  }
+                },
+                child: buttonChild),
+          ],
+        ),
       ),
     );
   }
